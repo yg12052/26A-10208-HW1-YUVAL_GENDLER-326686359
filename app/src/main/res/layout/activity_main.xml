@@ -23,6 +23,7 @@
             android:layout_height="200dp"
             android:layout_gravity="bottom|center_horizontal"
             android:src="@drawable/car"
+            android:contentDescription="Player"
             android:scaleType="fitCenter" />
 
     </FrameLayout>

@@ -1,6 +1,7 @@
 package com.example.lanegame
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +16,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var car: ImageView
     private lateinit var btnLeft: ImageButton
     private lateinit var btnRight: ImageButton
+    private val gameTickDelay = 1000L
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,14 +25,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         gameArea = findViewById(R.id.gameArea)
-        gameArea.post {
-            updateCarPosition()
-        }
-
         car = findViewById(R.id.car)
         btnLeft = findViewById(R.id.btnLeft)
         btnRight = findViewById(R.id.btnRight)
 
+        gameArea.post {
+            updateCarPosition()
+        }
         btnLeft.setOnClickListener {
             currentLane = when (currentLane) {
                 Lane.RIGHT -> Lane.CENTER
@@ -51,6 +53,24 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    private val gameTick = object : Runnable {
+        override fun run() {
+            Log.d("LaneGame", "TICK")
+            handler.postDelayed(this, gameTickDelay)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        handler.post(gameTick)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(gameTick)
+
     }
     private fun updateCarPosition() {
         val areaWidth = gameArea.width.toFloat()

@@ -2,12 +2,15 @@ package com.example.lanegame
 
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,6 +50,7 @@ class MainActivity : AppCompatActivity() {
                 Lane.LEFT -> Lane.CENTER
             }
             updateCarPosition()
+
         }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -55,23 +59,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val gameTick = object : Runnable {
-        override fun run() {
-            Log.d("LaneGame", "TICK")
-            handler.postDelayed(this, gameTickDelay)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        handler.post(gameTick)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacks(gameTick)
-
-    }
     private fun updateCarPosition() {
         val areaWidth = gameArea.width.toFloat()
         val carWidth = car.width.toFloat()
@@ -87,5 +74,55 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val gameTick = object : Runnable {
+        override fun run() {
+            handler.postDelayed(this, gameTickDelay)
+        }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        handler.post(gameTick)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(gameTick)
+    }
+
+    private fun dp(dp: Float): Int =
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp,
+            resources.displayMetrics
+        ).toInt()
+
+    private fun spawnObstacle(gameArea: FrameLayout) {
+        val obstacle = ImageView(this).apply {
+            setImageResource(R.drawable.obstacle)
+            layoutParams = FrameLayout.LayoutParams(dp(72f), dp(72f))
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            contentDescription = "Obstacle"
+        }
+
+
+        val laneIndex = Random.nextInt(3)
+        //same logic as the car
+        val xLeft = 0f
+        val xCenter = ((gameArea.width - obstacle.layoutParams.width) / 2f)
+        val xRight = (gameArea.width - obstacle.layoutParams.width).toFloat()
+
+        val x = when (laneIndex) {
+            0 -> xLeft
+            1 -> xCenter
+            else -> xRight
+        }
+
+        gameArea.addView(obstacle)
+
+        obstacle.x = x
+        obstacle.y = 120f
+
+
+    }
 }

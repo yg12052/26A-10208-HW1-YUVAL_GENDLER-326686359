@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity() {
     private val gameTickDelay = 200L
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val obstaclesQueue = ArrayDeque<ImageView>()
+    private lateinit var hearts: List<ImageView>
+    private var lives = 3
     private var tickCounter = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +34,11 @@ class MainActivity : AppCompatActivity() {
         car = findViewById(R.id.car)
         btnLeft = findViewById(R.id.btnLeft)
         btnRight = findViewById(R.id.btnRight)
-
+        hearts = listOf(
+            findViewById(R.id.heart1),
+            findViewById(R.id.heart2),
+            findViewById(R.id.heart3)
+        )
         gameArea.post {
             updateCarPosition()
         }
@@ -88,9 +94,21 @@ class MainActivity : AppCompatActivity() {
             }
             if (obstaclesQueue.isNotEmpty()) {
                 val firstObstacle = obstaclesQueue.first()
+                val hit = firstObstacle.x < car.x + car.width &&
+                        firstObstacle.x + firstObstacle.width > car.x &&
+                        firstObstacle.y < car.y + car.height &&
+                        firstObstacle.y + firstObstacle.height > car.y
+
                 if (firstObstacle.y  >= car.y + firstObstacle.height/2) {
-                    if (firstObstacle.x == car.x) {
-                        //implement collision results
+                    if (hit) {
+                        hearts[lives-1].visibility = ImageView.INVISIBLE
+                        lives--
+                        if (lives == 0) {
+                            for (i in hearts.indices) {
+                                hearts[i].visibility =ImageView.VISIBLE
+                            }
+                            lives=3
+                        }
                     }
                     gameArea.removeView(firstObstacle)
                     obstaclesQueue.removeFirst()

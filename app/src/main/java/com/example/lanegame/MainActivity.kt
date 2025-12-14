@@ -108,6 +108,18 @@ class MainActivity : AppCompatActivity() {
                         lastCrashTime = now
                         Toast.makeText(this@MainActivity, "CRASH!", Toast.LENGTH_SHORT).show()
 
+                        val vibrator = getSystemService(VIBRATOR_SERVICE) as android.os.Vibrator
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            vibrator.vibrate(
+                                android.os.VibrationEffect.createOneShot(
+                                    200,
+                                    android.os.VibrationEffect.DEFAULT_AMPLITUDE
+                                )
+                            )
+                        } else {
+                            vibrator.vibrate(200)
+                        }
+
                         hearts[lives-1].visibility = ImageView.INVISIBLE
                         lives--
                         if (lives == 0) {

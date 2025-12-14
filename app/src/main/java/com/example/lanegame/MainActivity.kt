@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnRight: ImageButton
     private val gameTickDelay = 1000L
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
-
+    private val obstaclesQueue = ArrayDeque<ImageView>()
+    private var tickCounter = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -76,6 +77,23 @@ class MainActivity : AppCompatActivity() {
 
     private val gameTick = object : Runnable {
         override fun run() {
+            tickCounter++
+            if (tickCounter == 3) {
+                val obstacle = spawnObstacle()
+                obstaclesQueue.addLast(obstacle)
+                tickCounter = 0
+            }
+            for (ob in obstaclesQueue) {
+                ob.y += 100f
+            }
+            if (obstaclesQueue.isNotEmpty()) {
+                val firstObstacle = obstaclesQueue.first()
+                if (firstObstacle.y  >= car.y + firstObstacle.height/2) {
+                    gameArea.removeView(firstObstacle)
+                    obstaclesQueue.removeFirst()
+                    Log.d("LaneGame", "obstacle removed")
+                }
+            }
             handler.postDelayed(this, gameTickDelay)
         }
     }
@@ -97,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             resources.displayMetrics
         ).toInt()
 
-    private fun spawnObstacle(gameArea: FrameLayout) {
+    private fun spawnObstacle(): ImageView {
         val obstacle = ImageView(this).apply {
             setImageResource(R.drawable.obstacle)
             layoutParams = FrameLayout.LayoutParams(dp(72f), dp(72f))
@@ -105,24 +123,22 @@ class MainActivity : AppCompatActivity() {
             contentDescription = "Obstacle"
         }
 
-
         val laneIndex = Random.nextInt(3)
-        //same logic as the car
+
         val xLeft = 0f
         val xCenter = ((gameArea.width - obstacle.layoutParams.width) / 2f)
         val xRight = (gameArea.width - obstacle.layoutParams.width).toFloat()
 
-        val x = when (laneIndex) {
+        obstacle.x = when (laneIndex) {
             0 -> xLeft
             1 -> xCenter
             else -> xRight
         }
-
-        gameArea.addView(obstacle)
-
-        obstacle.x = x
         obstacle.y = 120f
 
-
+        gameArea.addView(obstacle)
+        return obstacle
     }
+
+
 }

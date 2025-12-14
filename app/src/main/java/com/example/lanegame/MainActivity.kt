@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var car: ImageView
     private lateinit var btnLeft: ImageButton
     private lateinit var btnRight: ImageButton
-    private val gameTickDelay = 1000L
+    private val gameTickDelay = 200L
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val obstaclesQueue = ArrayDeque<ImageView>()
     private var tickCounter = 0
@@ -89,9 +89,12 @@ class MainActivity : AppCompatActivity() {
             if (obstaclesQueue.isNotEmpty()) {
                 val firstObstacle = obstaclesQueue.first()
                 if (firstObstacle.y  >= car.y + firstObstacle.height/2) {
+                    if (firstObstacle.x == car.x) {
+                        //implement collision results
+                    }
                     gameArea.removeView(firstObstacle)
                     obstaclesQueue.removeFirst()
-                    Log.d("LaneGame", "obstacle removed")
+
                 }
             }
             handler.postDelayed(this, gameTickDelay)

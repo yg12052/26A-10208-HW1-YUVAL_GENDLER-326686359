@@ -6,6 +6,7 @@ import android.util.TypedValue
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnLeft: ImageButton
     private lateinit var btnRight: ImageButton
     private val gameTickDelay = 200L
+    private var lastCrashTime = 0L
+    private val crashCooldownMs = 700L
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val obstaclesQueue = ArrayDeque<ImageView>()
     private lateinit var hearts: List<ImageView>
@@ -100,7 +103,11 @@ class MainActivity : AppCompatActivity() {
                         firstObstacle.y + firstObstacle.height > car.y
 
                 if (firstObstacle.y  >= car.y + firstObstacle.height/2) {
-                    if (hit) {
+                    val now = System.currentTimeMillis()
+                    if (hit && now - lastCrashTime >= crashCooldownMs) {
+                        lastCrashTime = now
+                        Toast.makeText(this@MainActivity, "CRASH!", Toast.LENGTH_SHORT).show()
+
                         hearts[lives-1].visibility = ImageView.INVISIBLE
                         lives--
                         if (lives == 0) {
